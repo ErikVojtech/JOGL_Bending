@@ -8,8 +8,6 @@ import java.awt.Dimension;
 import java.awt.DisplayMode;
 import java.awt.Font;
 import java.awt.Insets;
-import java.awt.Point;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -44,17 +42,16 @@ import com.jogamp.opengl.util.texture.TextureIO;
  */
 public class Render implements GLEventListener {
 
-	private static boolean isFullScreen = false;
 	public static DisplayMode dm, dm_old;
-	private static Dimension xgraphic;
-	private static Point point = new Point(0, 0);
-
+	
 	private GLU glu = new GLU();
-
-	private static float xrot;
+	
+	private float xrot;
 	private float yrot;
 	private float zrot;
+	
 	private int[] texture = new int[3];
+	
 
 	private float[] lightAmbient = { 0.5f, 0.5f, 0.5f, 1.0f };
 	private float[] lightDiffuse = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -80,18 +77,14 @@ public class Render implements GLEventListener {
 	public void display(GLAutoDrawable drawable) {
 		final GL2 gl = drawable.getGL().getGL2();
 		gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
-		// Clear The Screen And The Depth Buffer
 
-		gl.glLoadIdentity(); // Reset The View
+		gl.glLoadIdentity(); // view reset
 
 		gl.glTranslatef(1.0f, -1.0f, -12.0f);
 
 		gl.glRotatef(xrot + 15.0f, 1.0f, 0.0f, 0.0f);
 		gl.glRotatef(yrot + 35.0f, 0.0f, 1.0f, 0.0f);
 		gl.glRotatef(zrot + 90.0f, 0.0f, 0.0f, 1.0f);
-
-		
-		
 		
 		gl.glBindTexture(GL2.GL_TEXTURE_2D, texture[filter]);
 		if (light)
@@ -100,7 +93,7 @@ public class Render implements GLEventListener {
 			gl.glDisable(GL2.GL_LIGHTING);
 
 		gl.glBegin(GL2.GL_QUADS);
-
+		
 		// face 1
 		gl.glTexCoord2f(1.0f, 0.0f);
 		gl.glVertex3f(0.0f, -1.0f, 0.0f);
@@ -164,10 +157,9 @@ public class Render implements GLEventListener {
 
 		gl.glFlush();
 		
-		
-		  xrot -= .08; // dopredu/dozadu
-	      yrot += .04; // dokola jako kolotoc na miste
-		  zrot -= .01; // doleva / doprava jako volant
+		 this.xrot -= .02; // dopredu/dozadu
+		 this.yrot -= .02; // dokola
+		 this.zrot -= .008; // doleva / doprava
 	}
 
 	
@@ -175,14 +167,17 @@ public class Render implements GLEventListener {
 	@Override
 	public void init(GLAutoDrawable drawable) {
 		final GL2 gl = drawable.getGL().getGL2();
+		
+		
 		gl.glShadeModel(GL2.GL_SMOOTH);
 		gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL); // LINE / FILL
-		gl.glClearColor(0f, 0f, 0f, 0f);
+		gl.glClearColor(0f, 0.f, 0f, 0.5f);
 		gl.glClearDepth(1.0f);
 		gl.glEnable(GL2.GL_DEPTH_TEST);
 		gl.glDepthFunc(GL2.GL_LEQUAL);
 		gl.glHint(GL2.GL_PERSPECTIVE_CORRECTION_HINT, GL2.GL_NICEST);
 
+		
 		gl.glEnable(GL2.GL_TEXTURE_2D);
 		try {
 			File imgFile = new File("data/wood.png");
@@ -247,6 +242,7 @@ public class Render implements GLEventListener {
 	 */
 	public static void main(String[] args) {
 		// opening GL
+		
 		final GLProfile profile = GLProfile.get(GLProfile.GL2);
 		GLCapabilities capabilities = new GLCapabilities(profile);
 
@@ -259,7 +255,6 @@ public class Render implements GLEventListener {
 		final FPSAnimator animator = new FPSAnimator(glcanvas, 300,true );
 		
 		final JFrame frame = new JFrame ("JOGL projekt");
-		
 		
 		// ZADANI
 		JPanel textP = new JPanel();
@@ -305,7 +300,7 @@ public class Render implements GLEventListener {
 			}
 		});
 		frame.setSize(frame.getContentPane().getPreferredSize());
-
+		frame.pack();
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 
@@ -325,69 +320,6 @@ public class Render implements GLEventListener {
 		/*
 		 * 
 		 */
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0), "F1");
-		actionMap.put("F1", new AbstractAction() {
-
-		private static final long serialVersionUID = -6576101918414437189L;
-
-			@Override
-			public void actionPerformed(ActionEvent drawable) {
-				fullScreen(frame);
-			}
-		});
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "UP");
-		actionMap.put("UP", new AbstractAction() {
-
-			private static final long serialVersionUID = -6576101918414437189L;
-
-			@Override
-			public void actionPerformed(ActionEvent drawable) {
-				r.xspeed += 0.1f;
-			}
-		});
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "DOWN");
-		actionMap.put("DOWN", new AbstractAction() {
-
-			private static final long serialVersionUID = -6576101918414437189L;
-
-			@Override
-			public void actionPerformed(ActionEvent drawable) {
-				r.xspeed -= 0.1f;
-			}
-		});
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), "LEFT");
-		actionMap.put("LEFT", new AbstractAction() {
-
-			private static final long serialVersionUID = -6576101918414437189L;
-
-			@Override
-			public void actionPerformed(ActionEvent drawable) {
-				r.yspeed += 0.1f;
-			}
-		});
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), "RIGHT");
-		actionMap.put("RIGHT", new AbstractAction() {
-
-			private static final long serialVersionUID = -6576101918414437189L;
-
-			@Override
-			public void actionPerformed(ActionEvent drawable) {
-				r.yspeed -= 0.1f;
-			}
-		});
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F, 0), "F");
-		actionMap.put("F", new AbstractAction() {
-
-			private static final long serialVersionUID = 5720727831746187948L;
-
-			@Override
-			public void actionPerformed(ActionEvent drawable) {
-				r.filter++;
-				System.out.println("y");
-				if (r.filter > r.texture.length - 1)
-					r.filter = 0;
-			}
-		});
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_L, 0), "L");
 		actionMap.put("L", new AbstractAction() {
 
@@ -402,30 +334,4 @@ public class Render implements GLEventListener {
 			}
 		});
 	}
-
-	protected static void fullScreen(JFrame f) {
-		if (!isFullScreen) {
-			f.dispose();
-			f.setUndecorated(true);
-			f.setVisible(true);
-			f.setResizable(false);
-			xgraphic = f.getSize();
-			point = f.getLocation();
-			f.setLocation(0, 0);
-			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-			f.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
-
-			isFullScreen = true;
-		} else {
-			f.dispose();
-			f.setUndecorated(false);
-			f.setResizable(true);
-			f.setLocation(point);
-			f.setSize(xgraphic);
-			f.setVisible(true);
-
-			isFullScreen = false;
-		}
-	}
-
 }
